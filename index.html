@@ -63,10 +63,16 @@
                         <a class="page-scroll" href="#popular">Popular</a>
                     </li>
                     <li>
-                        <a class="page-scroll" href="#about">Login</a>
+                        <a id="tm_loginlink" class="btn" href="/login">Login</a>
                     </li>
                     <li>
-                        <a class="page-scroll" href="#team">Sign Up</a>
+                        <a id="tm_logoutlink" class="btn">Logout</a>
+                    </li>
+                    <li>
+                        <a id="tm_signuplink" class="btn" href="/register">Sign Up</a>
+                    </li>
+                    <li>
+                        <a href="/profile"><i class="fa fa-user fa-2x"></i>&nbsp;<span id="tm_useremail"></span></a>
                     </li>
                 </ul>
             </div>
@@ -116,6 +122,11 @@
         </div>
         </form>
                 </div>
+            <div hidden="" id="tm_loginalert" class="row">
+                <div class="col-xs-12 col-sm-4 col-sm-offset-4 alert alert-danger">
+                    <strong>Kindly <a id="tm_loginlink" class="btn" href="/login">Login</a> to continue !!!</strong>
+</div>
+            </div>
         </div>
     </section>
     
