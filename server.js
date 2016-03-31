@@ -28,7 +28,9 @@ app.use(stormpath.init(app, {
             // after registering and logging in, the user will be redirected to /index.html
             nextUri: '/index.html'
 
-        }
+        },me: {
+      enabled: false
+    }
     }
 }));
 app.on('stormpath.ready', function () {

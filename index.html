@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-
     <meta charset="utf-8">
     <!--<meta http-equiv="X-UA-Compatible" content="IE=edge">-->
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -175,8 +174,35 @@
         </div>
 </section>
     
+    <!-- Login Alert Modal -->
+    <div aria-labelledby="myModalLabel" class="modal fade" id="tm_alert" role="dialog" tabindex="-1">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button aria-label="Close" class="close" data-dismiss="modal" type="button">
+						<span aria-hidden="true">&times;</span>
+					</button>
+                    <h4 class="modal-title" id="myModalLabel">Please <a id="tm_loginlink" class="btn" href="/login">Login</a> to Continue</h4>
+				</div>
+			</div>
+		</div>
+	</div>
     
+    <!-- Already Voted -->
+    <div aria-labelledby="myModalLabel" class="modal fade" id="tm_alert_voted" role="dialog" tabindex="-1">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button aria-label="Close" class="close" data-dismiss="modal" type="button">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="myModalLabel">You have already Voted !</h4>
+				</div>
+			</div>
+		</div>
+	</div>
     
+    <!-- Footer -->
     <footer>
         <div class="container">
             <div class="row">

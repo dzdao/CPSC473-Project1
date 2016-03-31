@@ -31,7 +31,7 @@ function showpopularposts(){
             var tm_popularposts = data;
 			 for(i=0;i<tm_popularposts.length;i++)
 			{
-                var listitem = "<li class='list-group-item'><div class='row'><div class='col-xs-12 col-sm-2 col-sm-offset-1'><div class='votecount'><i class='fa fa-bullhorn fa-3x'></i>&nbsp;&nbsp;<span id='tm_qid' hidden=''>" + tm_popularposts[i].id + "</span><strong><span id='tm_votes'>" + tm_popularposts[i].vote + "</span></strong></div></div><div class='col-xs-12 col-sm-8'><h4>" +tm_popularposts[i].title+"</h4><p><em><a href='" +tm_popularposts[i].link +"'>" +tm_popularposts[i].link+"</a></em></p></div></div></li>";
+                var listitem = "<li class='list-group-item'><div class='row'><div class='col-xs-12 col-sm-2 col-sm-offset-1'><div class='votecount'><i class='fa fa-bolt fa-3x'></i>&nbsp;&nbsp;<span id='tm_qid' hidden=''>" + tm_popularposts[i].id + "</span><strong><span id='tm_votes'>" + tm_popularposts[i].vote + "</span></strong></div></div><div class='col-xs-12 col-sm-8'><h4>" +tm_popularposts[i].title+"</h4><p><em><a href='" +tm_popularposts[i].link +"'>" +tm_popularposts[i].link+"</a></em></p></div></div></li>";
 				$(".tm_displaypopularposts").append(listitem);
 			}         
 		 });
@@ -41,7 +41,7 @@ $("#tm_post").on('click', function(){
     $.get("/checklogin", function(data){
        console.log(data);
         if(data === 'Not logged in'){
-            $("#tm_loginalert").show();
+            $("#tm_alert").modal("show");
             $("#tm_showalertcontent").html('<strong>Kindly <a id="tm_loginlink" class="btn" href="/login">Login</a> to continue !!!</strong> <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>');
         }
         else{
@@ -82,7 +82,7 @@ $(".tm_displayposts").delegate('#tm_voteup', 'click', function(){
 	$.get("/checklogin", function(data){		
     
         if(data === 'Not logged in'){
-            console.log("Not Logged in");  
+            $("#tm_alert").modal("show");
         }
         else{
             $.post("/incr",{id: qid,useremail:useremail}, function(data){  
@@ -94,7 +94,7 @@ $(".tm_displayposts").delegate('#tm_voteup', 'click', function(){
                 showlatestposts();
                 }  
                 else if(data =='201'){
-                    alert("You have already voted.");
+                    $("#tm_alert_voted").modal("show");
                 }
           });
         }
@@ -107,7 +107,7 @@ $(".tm_displayposts").delegate('#tm_votedown', 'click', function(){
 			var votes = parseInt($(this).parent().siblings('.votecount').children("#tm_votes").text());
     $.get("/checklogin", function(data){
         if(data === 'Not logged in'){
-            console.log("Not Logged in");
+            $("#tm_alert").modal("show");
         }
         else{
             $.post("/decr",{id: qid,useremail:useremail}, function(data){  
@@ -116,10 +116,10 @@ $(".tm_displayposts").delegate('#tm_votedown', 'click', function(){
                 }
                 else if(data =='200'){
 					$(".tm_displayposts").empty();
-                showlatestposts();
+                    showlatestposts();
                 }  
                 else if(data =='201'){
-                    alert("You have already voted.");
+                    $("#tm_alert_voted").modal("show");
                 }
           });
         }
