@@ -35,8 +35,6 @@ app.on('stormpath.ready', function() {
 console.log('Stormpath Ready');
 });
 
-
-
 app.get('/checklogin',stormpath.getUser, function(req, res) {
     if (req.user) {
         res.send(req.user.email);
@@ -44,8 +42,6 @@ app.get('/checklogin',stormpath.getUser, function(req, res) {
     res.send('Not logged in');
     }    
 });
-
-
 
 //readpost
 app.get('/readpost', function(req, res) {
@@ -56,7 +52,7 @@ app.get('/readpost', function(req, res) {
     
 });
 
-app.post('/addpost', stormpath.loginRequired, function(req, res) {
+app.post('/addpost', function(req, res) {
     console.log("in server");
     var title = req.body.title;
     var link = req.body.link;
@@ -82,6 +78,82 @@ app.post('/addpost', stormpath.loginRequired, function(req, res) {
     });
     
 });
+
+app.post('/incr', function(req, res){
+	var id = req.body.id;
+    var useremail = req.body.useremail;
+	var content;
+	var isVote = false;
+	var ifExists = false;
+	var responsemsg;
+	
+	fs.readFile('db/db.json', 'utf8', function(err, data) {
+        content = JSON.parse(data);
+		for(var i=0; i<content['questions'].length; i++){
+			if(content['questions'][i]['id'] == id){
+							var content_users = content['questions'][i]['users'];
+				for(var j=0; j<content_users.length ; j++){
+					if(content_users[j]['email'] == useremail){
+						isVote = true;
+					}
+				}
+				if(!isVote){
+					content['questions'][i]["vote"]++;
+                     content_users.push({
+                        'email': useremail
+                    }); 
+					fs.writeFile("db/db.json", JSON.stringify(content), 'utf8');
+                    responsemsg = "200";
+                    res.end(responsemsg);
+				}
+				else{
+					responsemsg = "201";
+					res.end(responsemsg);
+				}
+				
+			}
+		}
+	});
+ });
+	
+
+app.post('/decr', function(req, res){
+	var id = req.body.id;
+    var useremail = req.body.useremail;
+	var content;
+	var isVote = false;
+	var ifExists = false;
+	var responsemsg;
+	
+	fs.readFile('db/db.json', 'utf8', function(err, data) {
+        content = JSON.parse(data);
+		for(var i=0; i<content['questions'].length; i++){
+			if(content['questions'][i]['id'] == id){
+							var content_users = content['questions'][i]['users'];
+				for(var j=0; j<content_users.length ; j++){
+					if(content_users[j]['email'] == useremail){
+						isVote = true;
+					}
+				}
+				if(!isVote){
+					content['questions'][i]["vote"]--;
+                     content_users.push({
+                        'email': useremail
+                    }); 
+					fs.writeFile("db/db.json", JSON.stringify(content), 'utf8');
+                    responsemsg = "200";
+                    res.end(responsemsg);
+				}
+				else{
+					responsemsg = "201";
+					res.end(responsemsg);
+				}
+				
+			}
+		}
+	});
+ });
+
 
 app.listen(5000, function() {
     console.log("Started on PORT 5000");
