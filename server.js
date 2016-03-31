@@ -1,7 +1,7 @@
 var express = require("express");
 var bodyParser = require("body-parser");
 var stormpath = require("express-stormpath");
-var fs = require('fs');
+var request = require('request');
 var app = express();
 app.use(express.static(__dirname + '/'));
 
@@ -13,148 +13,177 @@ app.use(bodyParser.json());
 
 
 app.use(stormpath.init(app, {
-  client: {
-    apiKey: {
-      id: '6G6UCTOJJWLBRUZ73PRX023I7',
-      secret: 'i9AIHgjlVBToIhYZX/DUA8fKq+TUgpDEGleQeK6FrgY'
+    client: {
+        apiKey: {
+            id: '6G6UCTOJJWLBRUZ73PRX023I7'
+            , secret: 'i9AIHgjlVBToIhYZX/DUA8fKq+TUgpDEGleQeK6FrgY'
+        }
     }
-  },
-  application: {
-    href: 'https://api.stormpath.com/v1/applications/3UXGpJ9k0hoGYhxR7SKLIv'
-  },
+    , application: {
+        href: 'https://api.stormpath.com/v1/applications/3UXGpJ9k0hoGYhxR7SKLIv'
+    },
 
-  web: {
-    register: {
-      // after registering and logging in, the user will be redirected to /index.html
-      nextUri: '/index.html'
-      
+    web: {
+        register: {
+            // after registering and logging in, the user will be redirected to /index.html
+            nextUri: '/index.html'
+
+        }
     }
-  }
 }));
-app.on('stormpath.ready', function() {
-console.log('Stormpath Ready');
+app.on('stormpath.ready', function () {
+    console.log('Stormpath Ready');
 });
 
-app.get('/checklogin',stormpath.getUser, function(req, res) {
+app.get('/checklogin', stormpath.getUser, function (req, res) {
     if (req.user) {
         res.send(req.user.email);
     } else {
-    res.send('Not logged in');
-    }    
+        res.send('Not logged in');
+    }
 });
 
 //readpost
-app.get('/readpost', function(req, res) {
-   
-    fs.readFile('db/db.json', 'utf8', function(err, data) {
-        res.end(data);
-    });
-    
+app.get('/readpost', function (req, res) {
+
+    request('http://localhost:3000/questions?_sort=views&_order=DESC', function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            res.send(JSON.parse(body));
+        }
+    })
 });
 
-app.post('/addpost', function(req, res) {
+app.get('/readpopularpost', function (req, res) {
+
+    request('http://localhost:3000/questions?_sort=vote&_order=DESC', function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            res.send(JSON.parse(body));
+        }
+    })
+
+
+});
+
+app.post('/addpost', function (req, res) {
     console.log("in server");
     var title = req.body.title;
     var link = req.body.link;
     var length;
     var data;
     var content;
-    fs.readFile('db/db.json', 'utf8', function(err, data){
-        content = JSON.parse(data);
-        length = content['questions'].length;
-        var data = content['questions'];
+    data = {
+        "id": length + 1
+        , "title": title
+        , "link": link
+        , "vote": 0
+        , "users": []
+    };
 
-        data.push({
-            "id" : length + 1,
-            "title": title,
-            "link":link,
-            "vote": 0,
-            "users": []
-        });
-
-        console.log(data);
-        fs.writeFile("db/db.json", JSON.stringify(content), 'utf8');
-        res.end();
-    });
-    
+    console.log(data);
+    request.post({
+        url: 'http://localhost:3000/questions'
+        , headers: {
+            'Content-Type': 'application/json'
+        }
+        , body: JSON.stringify(data)
+    }, function (err, httpResponse, body) {
+        var body = JSON.parse(body);
+        res.send(body);
+    })
 });
 
-app.post('/incr', function(req, res){
-	var id = req.body.id;
+app.post('/incr', function (req, res) {
+    var id = req.body.id;
     var useremail = req.body.useremail;
-	var content;
-	var isVote = false;
-	var ifExists = false;
-	var responsemsg;
-	
-	fs.readFile('db/db.json', 'utf8', function(err, data) {
-        content = JSON.parse(data);
-		for(var i=0; i<content['questions'].length; i++){
-			if(content['questions'][i]['id'] == id){
-							var content_users = content['questions'][i]['users'];
-				for(var j=0; j<content_users.length ; j++){
-					if(content_users[j]['email'] == useremail){
-						isVote = true;
-					}
-				}
-				if(!isVote){
-					content['questions'][i]["vote"]++;
-                     content_users.push({
-                        'email': useremail
-                    }); 
-					fs.writeFile("db/db.json", JSON.stringify(content), 'utf8');
+    var content;
+    var isVote = false;
+    var ifExists = false;
+    var responsemsg;
+    var content_users;
+    var data;
+
+    request('http://localhost:3000/questions/' + id, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            content = JSON.parse(body);
+            content_users = content.users;
+            for (var j = 0; j < content_users.length; j++) {
+                if (content_users[j]['email'] == useremail) {
+                    isVote = true;
+                }
+            }
+            if (!isVote) {
+                content_users.push({
+                    'email': useremail
+                });
+                content.vote += 1;
+                data = {
+                    'vote': content.vote
+                    , 'users': content_users
+                }
+                request({
+                    url: 'http://localhost:3000/questions/' + id
+                    , method: 'PATCH'
+                    , json: data
+                }, function (err, httpResponse, body) {
+                    console.log("successful");
                     responsemsg = "200";
                     res.end(responsemsg);
-				}
-				else{
-					responsemsg = "201";
-					res.end(responsemsg);
-				}
-				
-			}
-		}
-	});
- });
-	
+                });
+            } else {
+                responsemsg = "201";
+                res.end(responsemsg);
+            }
+        }
+    })
+});
 
-app.post('/decr', function(req, res){
-	var id = req.body.id;
+
+app.post('/decr', function (req, res) {
+    var id = req.body.id;
     var useremail = req.body.useremail;
-	var content;
-	var isVote = false;
-	var ifExists = false;
-	var responsemsg;
-	
-	fs.readFile('db/db.json', 'utf8', function(err, data) {
-        content = JSON.parse(data);
-		for(var i=0; i<content['questions'].length; i++){
-			if(content['questions'][i]['id'] == id){
-							var content_users = content['questions'][i]['users'];
-				for(var j=0; j<content_users.length ; j++){
-					if(content_users[j]['email'] == useremail){
-						isVote = true;
-					}
-				}
-				if(!isVote){
-					content['questions'][i]["vote"]--;
-                     content_users.push({
-                        'email': useremail
-                    }); 
-					fs.writeFile("db/db.json", JSON.stringify(content), 'utf8');
+    var content;
+    var isVote = false;
+    var ifExists = false;
+    var responsemsg;
+    var content_users;
+    var data;
+
+    request('http://localhost:3000/questions/' + id, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            content = JSON.parse(body);
+            content_users = content.users;
+            for (var j = 0; j < content_users.length; j++) {
+                if (content_users[j]['email'] == useremail) {
+                    isVote = true;
+                }
+            }
+            if (!isVote) {
+                content_users.push({
+                    'email': useremail
+                });
+                content.vote -= 1;
+                data = {
+                    'vote': content.vote
+                    , 'users': content_users
+                }
+                request({
+                    url: 'http://localhost:3000/questions/' + id
+                    , method: 'PATCH'
+                    , json: data
+                }, function (err, httpResponse, body) {
+                    console.log("successful");
                     responsemsg = "200";
                     res.end(responsemsg);
-				}
-				else{
-					responsemsg = "201";
-					res.end(responsemsg);
-				}
-				
-			}
-		}
-	});
- });
+                });
+            } else {
+                responsemsg = "201";
+                res.end(responsemsg);
+            }
+        }
+    })
+});
 
 
-app.listen(5000, function() {
+app.listen(5000, function () {
     console.log("Started on PORT 5000");
 })
