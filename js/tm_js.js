@@ -62,7 +62,7 @@ $("#tm_post").on('click', function(){
 	            $("#tm_link").val("");
                 $(".tm_displayposts").empty();
                 showlatestposts();
-                showlatestposts();
+                showpopularposts();
           });
             }
         }
