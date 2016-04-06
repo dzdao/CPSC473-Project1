@@ -1,3 +1,5 @@
+// express-stormpath used for authentication of the users.
+
 var express = require("express");
 var bodyParser = require("body-parser");
 var stormpath = require("express-stormpath");
@@ -15,11 +17,11 @@ app.use(bodyParser.json());
 app.use(stormpath.init(app, {
     client: {
         apiKey: {
-            id: '6G6UCTOJJWLBRUZ73PRX023I7'
-            , secret: 'i9AIHgjlVBToIhYZX/DUA8fKq+TUgpDEGleQeK6FrgY'
+            id: '6G6UCTOJJWLBRUZ73PRX023I7',
+             secret: 'i9AIHgjlVBToIhYZX/DUA8fKq+TUgpDEGleQeK6FrgY'
         }
-    }
-    , application: {
+    },
+     application: {
         href: 'https://api.stormpath.com/v1/applications/3UXGpJ9k0hoGYhxR7SKLIv'
     },
 
@@ -30,7 +32,7 @@ app.use(stormpath.init(app, {
 
         },
         me: {
-      enabled: false
+      enabled: false // disabled self route so that user can not see contents of the JSON db. Route comes default with stormpath.
     }
     }
 }));
@@ -46,7 +48,7 @@ app.get('/checklogin', stormpath.getUser, function (req, res) {
     }
 });
 
-//readpost
+//For reading the post from db.json
 app.get('/readpost', function (req, res) {
 
     request('http://localhost:3000/questions?_sort=views&_order=DESC', function (error, response, body) {
@@ -56,6 +58,7 @@ app.get('/readpost', function (req, res) {
     })
 });
 
+//For reading the popular post from db.json
 app.get('/readpopularpost', function (req, res) {
 
     request('http://localhost:3000/questions?_sort=vote&_order=DESC', function (error, response, body) {
@@ -67,6 +70,7 @@ app.get('/readpopularpost', function (req, res) {
 
 });
 
+//For adding post 
 app.post('/addpost', function (req, res) {
     console.log("in server");
     var title = req.body.title;
@@ -94,7 +98,7 @@ app.post('/addpost', function (req, res) {
         res.send(body);
     })
 });
-
+//For incrementing vote count
 app.post('/incr', function (req, res) {
     var id = req.body.id;
     var useremail = req.body.useremail;
@@ -140,7 +144,7 @@ app.post('/incr', function (req, res) {
     })
 });
 
-
+//For decrementing vote count
 app.post('/decr', function (req, res) {
     var id = req.body.id;
     var useremail = req.body.useremail;
